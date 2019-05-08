@@ -33,10 +33,10 @@ public class playerCtrl : MonoBehaviour {
     {
         EmoEngine.Instance.EmoStateUpdated += new EmoEngine.EmoStateUpdatedEventHandler(engine_EmoStateUpdated);
         conesHit = 0;
-        arraySize = 100;
-        threshold_forward = 10;
-        threshold_left = 10;
-        threshold_right = 10;
+        arraySize = 30;
+        threshold_forward = arraySize/10;
+        threshold_left = arraySize/10;
+        threshold_right = arraySize/10;
         numTrueForward = 0;
         numTrueLeft = 0;
         numTrueRight = 0;
@@ -193,7 +193,7 @@ public class playerCtrl : MonoBehaviour {
         {
             threshold_forward -= (arraySize/10);
         }
-        displayMessage("Forward-sensitivity: " + ((arraySize - threshold_forward) / 10));
+        displayMessage("Forward-sensitivity: " + ((arraySize - threshold_forward) / (arraySize/10)));
     }
     /**
      * Decreases threshold of the left command.
@@ -204,7 +204,7 @@ public class playerCtrl : MonoBehaviour {
         {
             threshold_left -= (arraySize/10);
         }
-        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left) / 10));
+        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left) / (arraySize / 10)));
     }
     /**
      * Decreases threshold of the right command.
@@ -215,7 +215,7 @@ public class playerCtrl : MonoBehaviour {
         {
             threshold_right -= (arraySize/10);
         }
-        displayMessage("Right-sensitivity: " + ((arraySize - threshold_right) / 10));
+        displayMessage("Right-sensitivity: " + ((arraySize - threshold_right) / (arraySize / 10)));
     }
     /**
      * Increases theshold of the forward command.
@@ -226,7 +226,7 @@ public class playerCtrl : MonoBehaviour {
         {
             threshold_forward += (arraySize/10);
         }
-        displayMessage("Forward-sensitivity: " + ((arraySize - threshold_forward) / 10));
+        displayMessage("Forward-sensitivity: " + ((arraySize - threshold_forward) / (arraySize / 10)));
     }
     /**
      * Increases theshold of the left command.
@@ -237,7 +237,7 @@ public class playerCtrl : MonoBehaviour {
         {
             threshold_left += (arraySize/10);
         }
-        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left) / 10));
+        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left) / (arraySize / 10)));
     }
     /**
      * Increases theshold of the right command.
@@ -248,7 +248,7 @@ public class playerCtrl : MonoBehaviour {
         {
             threshold_right += (arraySize/10);
         }
-        displayMessage("Right-sensitivity: " + ((arraySize - threshold_right) / 10));
+        displayMessage("Right-sensitivity: " + ((arraySize - threshold_right) / (arraySize / 10)));
     }
     /**
      * Displays a message to the user for 5 seconds.

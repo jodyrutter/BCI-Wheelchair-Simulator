@@ -15623,7 +15623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
-  rotationSpeed: 10
+  rotationSpeed: 5
   rb: {fileID: 390243844}
   message_box: {fileID: 389988061}
 --- !u!1 &394574530 stripped
