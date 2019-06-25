@@ -40,17 +40,24 @@ public class EmotivCtrl : MonoBehaviour {
 	 */
     void Awake () 
 	{	
-		engine = EmoEngine.Instance;
-		engine.UserAdded                      += new EmoEngine.UserAddedEventHandler (UserAddedEvent);
-		engine.UserRemoved 				      += new EmoEngine.UserRemovedEventHandler (UserRemovedEvent);
-		engine.EmoEngineConnected             += new EmoEngine.EmoEngineConnectedEventHandler (EmotivConnected);
-		engine.EmoEngineDisconnected          += new EmoEngine.EmoEngineDisconnectedEventHandler (EmotivDisconnected);
-        engine.MentalCommandTrainingStarted   += new EmoEngine.MentalCommandTrainingStartedEventEventHandler (TrainingStarted);
-		engine.MentalCommandTrainingSucceeded += new EmoEngine.MentalCommandTrainingSucceededEventHandler (TrainingSucceeded);
-		engine.MentalCommandTrainingCompleted += new EmoEngine.MentalCommandTrainingCompletedEventHandler (TrainingCompleted);
-		engine.MentalCommandTrainingRejected  += new EmoEngine.MentalCommandTrainingRejectedEventHandler (TrainingRejected);
-		engine.MentalCommandTrainingReset     += new EmoEngine.MentalCommandTrainingResetEventHandler (TrainingReset);
-		engine.Connect ();
+        try
+        {
+            engine = EmoEngine.Instance;
+            engine.UserAdded += new EmoEngine.UserAddedEventHandler(UserAddedEvent);
+            engine.UserRemoved += new EmoEngine.UserRemovedEventHandler(UserRemovedEvent);
+            engine.EmoEngineConnected += new EmoEngine.EmoEngineConnectedEventHandler(EmotivConnected);
+            engine.EmoEngineDisconnected += new EmoEngine.EmoEngineDisconnectedEventHandler(EmotivDisconnected);
+            engine.MentalCommandTrainingStarted += new EmoEngine.MentalCommandTrainingStartedEventEventHandler(TrainingStarted);
+            engine.MentalCommandTrainingSucceeded += new EmoEngine.MentalCommandTrainingSucceededEventHandler(TrainingSucceeded);
+            engine.MentalCommandTrainingCompleted += new EmoEngine.MentalCommandTrainingCompletedEventHandler(TrainingCompleted);
+            engine.MentalCommandTrainingRejected += new EmoEngine.MentalCommandTrainingRejectedEventHandler(TrainingRejected);
+            engine.MentalCommandTrainingReset += new EmoEngine.MentalCommandTrainingResetEventHandler(TrainingReset);
+            engine.Connect();
+        }
+        catch
+        {
+            engine = null;
+        }
 	}
 	/*
 	 * Method that runs at startup.
@@ -100,7 +107,10 @@ public class EmotivCtrl : MonoBehaviour {
             loaded = true;
             loadProfile();
         }
-		engine.ProcessEvents ();
+        if (engine != null)
+        {
+            engine.ProcessEvents();
+        }
         displayTime -= Time.deltaTime;
         loadTime -= Time.deltaTime;
         if (displayTime < 0)
