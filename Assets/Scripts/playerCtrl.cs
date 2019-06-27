@@ -126,16 +126,8 @@ public class playerCtrl : MonoBehaviour {
 	 * A method that determines when the wheelchair should be moving.
 	*/
     void FixedUpdate() {
-        if (EmotivCtrl.movementEnabled)  //If movement is enabled, the wheelchair can move.
+        if (EmotivCtrl.movementEnabled)  //If movement is enabled, the wheelchair can move with BCI and keys.
         {
-            //Movement via keys.
-            float translation = Input.GetAxis("Vertical") * speed;
-            float rotation = Input.GetAxis("Horizontal") * rotationSpeed;
-            translation *= Time.deltaTime;
-            rotation *= Time.deltaTime;
-            transform.Translate(0, 0, translation);
-            transform.Rotate(0, rotation, 0);
-
             //Deciding movement based on emotiv data.
             if (numTrueForward > threshold_forward)
             {
@@ -154,8 +146,14 @@ public class playerCtrl : MonoBehaviour {
                 //Do nothing.
             }
         }
-        //If the wheelchair is not enabled, it won't move.
-
+        //If the wheelchair is not enabled, it can only move with keys.
+        //Movement via keys.
+        float translation = Input.GetAxis("Vertical") * speed;
+        float rotation = Input.GetAxis("Horizontal") * rotationSpeed;
+        translation *= Time.deltaTime;
+        rotation *= Time.deltaTime;
+        transform.Translate(0, 0, translation);
+        transform.Rotate(0, rotation, 0);
         //If the wheelchair falls beneath the floor somehow, move it back to the starting position.
         if (rb.position.y < 0)
         {

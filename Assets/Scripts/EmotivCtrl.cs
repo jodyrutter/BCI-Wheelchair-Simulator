@@ -199,10 +199,18 @@ public class EmotivCtrl : MonoBehaviour {
      */
     public void TrainNeutral()
     {
-        loadProfile();
-        engine.MentalCommandSetTrainingAction((uint)userID, EdkDll.IEE_MentalCommandAction_t.MC_NEUTRAL);
-        engine.MentalCommandSetTrainingControl((uint)userID, EdkDll.IEE_MentalCommandTrainingControl_t.MC_START);
-        movementEnabled = false;
+        if (engine != null)
+        {
+
+            loadProfile();
+            engine.MentalCommandSetTrainingAction((uint)userID, EdkDll.IEE_MentalCommandAction_t.MC_NEUTRAL);
+            engine.MentalCommandSetTrainingControl((uint)userID, EdkDll.IEE_MentalCommandTrainingControl_t.MC_START);
+            movementEnabled = false;
+        }
+        else
+        {
+            //Do nothing.
+        }
     }
     /**
      * Completely rebuilds the drops down menus if an option is chosen in one.
@@ -733,7 +741,7 @@ public class EmotivCtrl : MonoBehaviour {
      */
     public void TrainForward()
     {
-        if (selectedForwards) //If a mental command is picked, train it.
+        if (selectedForwards && engine!=null) //If a mental command is picked, train it.
         {
             uint action = forward;
             listAction = listAction | action;
@@ -741,11 +749,15 @@ public class EmotivCtrl : MonoBehaviour {
             engine.MentalCommandSetTrainingAction((uint)userID, (Emotiv.EdkDll.IEE_MentalCommandAction_t)forward);
             engine.MentalCommandSetTrainingControl((uint)userID, EdkDll.IEE_MentalCommandTrainingControl_t.MC_START);
         }
-        else //If not, allow the user to pick a mental command for moving forward.
+        else if(engine!=null)//If not, allow the user to pick a mental command for moving forward.
         {
             pickForwards.transform.Translate(0, 100, 0);
             train_forward.transform.Translate(0, -100, 0);
             pickForwards.Show();
+        }
+        else
+        {
+            //Do nothing, since there is no emotiv connection.
         }
     }
     /**
@@ -753,7 +765,7 @@ public class EmotivCtrl : MonoBehaviour {
      */
     public void TrainLeft()
     {
-        if (selectedLeft) //If a mental command is picked, train it.
+        if (selectedLeft && engine != null) //If a mental command is picked, train it.
         {
             uint action = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
             listAction = listAction | action;
@@ -761,11 +773,15 @@ public class EmotivCtrl : MonoBehaviour {
             engine.MentalCommandSetTrainingAction((uint)userID, EdkDll.IEE_MentalCommandAction_t.MC_LEFT);
             engine.MentalCommandSetTrainingControl((uint)userID, EdkDll.IEE_MentalCommandTrainingControl_t.MC_START);
         }
-        else  //If not, allow the user to pick a mental command for rotating left.
+        else if (engine != null)  //If not, allow the user to pick a mental command for rotating left.
         {
             pickLeft.transform.Translate(0, 100, 0);
             train_left.transform.Translate(0, -100, 0);
             pickLeft.Show();
+        }
+        else
+        {
+            //Do nothing
         }
     }
     /**
@@ -773,7 +789,7 @@ public class EmotivCtrl : MonoBehaviour {
      */
     public void TrainRight()
     {
-        if (selectedRight)  //If a mental command is picked, train it.
+        if (selectedRight && engine != null)  //If a mental command is picked, train it.
         {
             uint action = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
             listAction = listAction | action;
@@ -781,11 +797,15 @@ public class EmotivCtrl : MonoBehaviour {
             engine.MentalCommandSetTrainingAction((uint)userID, EdkDll.IEE_MentalCommandAction_t.MC_RIGHT);
             engine.MentalCommandSetTrainingControl((uint)userID, EdkDll.IEE_MentalCommandTrainingControl_t.MC_START);
         }
-        else  //If not, allow the user to pick a mental command for rotating right.
+        else if (engine != null) //If not, allow the user to pick a mental command for rotating right.
         {
             pickRight.transform.Translate(0, 100, 0);
             train_right.transform.Translate(0, -100, 0);
             pickRight.Show();
+        }
+        else
+        {
+            //Do nothing
         }
     }
     /**
