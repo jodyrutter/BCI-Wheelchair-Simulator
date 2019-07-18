@@ -26,6 +26,7 @@ public class playerCtrl : MonoBehaviour {
 	EmoEngine engine;  //An emotive engine to monitor for changes in state.
     List<int> movement = new List<int>();  //A list containing an arraySize number of previous emotiv states.
     public Text message_box;  //A textbox to display messages to.
+    private static float unresponsive; //Time till Emotive is deamed unresponsive.
     /*
      * Initialize all variables.
      */
@@ -40,6 +41,7 @@ public class playerCtrl : MonoBehaviour {
         numTrueForward = 0;
         numTrueLeft = 0;
         numTrueRight = 0;
+        unresponsive = 1f;
     }
     /*
 	 * This method handles the EmoEngine update event 
@@ -53,7 +55,8 @@ public class playerCtrl : MonoBehaviour {
 	 */
     void engine_EmoStateUpdated(object sender, EmoStateUpdatedEventArgs e)
 	{
-		EmoState es = e.emoState;
+        unresponsive = 1f;
+        EmoState es = e.emoState;
         int removedAction;
         if ((movement.Count+1) > arraySize)
         {
@@ -122,7 +125,21 @@ public class playerCtrl : MonoBehaviour {
         rotate *= Time.deltaTime;
         transform.Rotate(0, rotate, 0);
     }
-	/*
+    /*
+     * A method that updates every frame. Used to determine if Emotiv is unresponsive.
+     */
+    void Update()
+    {
+        unresponsive -= Time.deltaTime;
+        if (unresponsive < 0)
+        {
+            numTrueForward = 0;
+            numTrueLeft = 0;
+            numTrueRight = 0;
+            movement.Clear();
+        }
+    }
+    /*
 	 * A method that determines when the wheelchair should be moving.
 	*/
     void FixedUpdate() {
