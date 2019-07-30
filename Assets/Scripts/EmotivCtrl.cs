@@ -2,7 +2,7 @@
  * Script responsible for parsing Emotiv data, training user input, and saving/loading a user profile.
  * 
  * @author Jody Rutter
- * @version 1.0 4/30/2019
+ * @version 2.0 7/30/2019
  **/
 using System;
 using UnityEngine;
@@ -99,6 +99,7 @@ public class EmotivCtrl : MonoBehaviour {
     /*
 	 * Call the ProcessEvents() method in Update once per frame
      * Manage how long a message is displayed on a message box.
+     * Also tracks the time an Emotiv Headset has been disconnected for.
 	 */
     void Update ()
     {
@@ -217,9 +218,11 @@ public class EmotivCtrl : MonoBehaviour {
      */
     void rebuildLists()
     {
+        //Clears all lists
         pickForwards.options.Clear();
         pickLeft.options.Clear();
         pickRight.options.Clear();
+        //Adds the choosen option to the start of the list, or, if no option is choosen, puts Select (direction) on the list
         if (actionToString(forward) != null)
         {
             Dropdown.OptionData choosenOption = new Dropdown.OptionData();
@@ -256,6 +259,7 @@ public class EmotivCtrl : MonoBehaviour {
             defaultOptionRight.text = "Select Right";
             pickRight.options.Add(defaultOptionRight);
         }
+        //Populates the list with all available choices
         for (int i = 0; i < menuOptions.Length; i++)
         {
 
@@ -276,65 +280,22 @@ public class EmotivCtrl : MonoBehaviour {
      */
     string actionToString(uint action)
     {
-        if (action == 0)
+        switch (action)
         {
-            return null;
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH)
-        {
-            return "Push";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL)
-        {
-            return "Pull";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT)
-        {
-            return "Lift";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP)
-        {
-            return "Drop";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT)
-        {
-            return "Left";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT)
-        {
-            return "Right";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT)
-        {
-            return "Rotate Left";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT)
-        {
-            return "Rotate Right";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE)
-        {
-            return "Rotate Clockwise";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE)
-        {
-            return "Rotate Counter";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS)
-        {
-            return "Rotate Forwards";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE)
-        {
-            return "Rotate Reverse";
-        }
-        else if (action == (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR)
-        {
-            return "Disappear";
-        }
-        else
-        {
-            return null;
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH: return "Push";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL: return "Pull";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT: return "Lift";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP: return "Drop";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT: return "Left";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT: return "Right";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT: return "Rotate Left";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT:; return "Rotate Right";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE: return "Rotate Clockwise";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE: return "Rotate Counter";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS: return "Rotate Forwards";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE: return "Rotate Reverse";
+            case (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR: return "Disappear";
+            default: return null;
         }
     }
     /**
@@ -348,126 +309,67 @@ public class EmotivCtrl : MonoBehaviour {
         }
         else
         {
-            if (pickForwards.options[pickForwards.value].text.Equals("Push"))
+            switch (pickForwards.options[pickForwards.value].text)
             {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[0] = null;
-                rebuildLists();
+                case "Push":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH;
+                    menuOptions[0] = null;
+                    break;
+                case "Pull":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL;
+                    menuOptions[1] = null;
+                    break;
+                case "Lift":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT;
+                    menuOptions[2] = null;
+                    break;
+                case "Drop":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP;
+                    menuOptions[3] = null;
+                    break;
+                case "Left":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
+                    menuOptions[4] = null;
+                    break;
+                case "Right":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
+                    menuOptions[5] = null;
+                    break;
+                case "Rotate Left":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT;
+                    menuOptions[6] = null;
+                    break;
+                case "Rotate Right":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT;
+                    menuOptions[7] = null;
+                    break;
+                case "Rotate Clockwise":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE;
+                    menuOptions[8] = null;
+                    break;
+                case "Rotate Counter":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE;
+                    menuOptions[9] = null;
+                    break;
+                case "Rotate Forwards":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS;
+                    menuOptions[10] = null;
+                    break;
+                case "Rotate Reverse":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE;
+                    menuOptions[11] = null;
+                    break;
+                case "Disappear":
+                    forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR;
+                    menuOptions[12] = null;
+                    break;
+                default:
+                    return;
             }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Pull"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[1] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Lift"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[2] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Drop"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[3] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Left"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[4] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Right"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[5] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Rotate Left"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[6] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Rotate Right"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[7] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Rotate Clockwise"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[8] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Rotate Counter"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[9] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Rotate Forwards"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[10] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Rotate Reverse"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[11] = null;
-                rebuildLists();
-            }
-            else if (pickForwards.options[pickForwards.value].text.Equals("Disappear"))
-            {
-                forward = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR;
-                pickForwards.transform.Translate(0, -100, 0);
-                train_forward.transform.Translate(0, 100, 0);
-                selectedForwards = true;
-                menuOptions[12] = null;
-                rebuildLists();
-            }
-            else
-            {
-            }
+            pickForwards.transform.Translate(0, -100, 0);
+            train_forward.transform.Translate(0, 100, 0);
+            selectedForwards = true;
+            rebuildLists();
         }
     }
     /**
@@ -481,126 +383,67 @@ public class EmotivCtrl : MonoBehaviour {
         }
         else
         {
-            if (pickLeft.options[pickLeft.value].text.Equals("Push"))
+            switch (pickLeft.options[pickLeft.value].text)
             {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[0] = null;
-                rebuildLists();
+                case "Push":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH;
+                    menuOptions[0] = null;
+                    break;
+                case "Pull":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL;
+                    menuOptions[1] = null;
+                    break;
+                case "Lift":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT;
+                    menuOptions[2] = null;
+                    break;
+                case "Drop":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP;
+                    menuOptions[3] = null;
+                    break;
+                case "Left":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
+                    menuOptions[4] = null;
+                    break;
+                case "Right":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
+                    menuOptions[5] = null;
+                    break;
+                case "Rotate Left":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT;
+                    menuOptions[6] = null;
+                    break;
+                case "Rotate Right":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT;
+                    menuOptions[7] = null;
+                    break;
+                case "Rotate Clockwise":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE;
+                    menuOptions[8] = null;
+                    break;
+                case "Rotate Counter":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE;
+                    menuOptions[9] = null;
+                    break;
+                case "Rotate Forwards":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS;
+                    menuOptions[10] = null;
+                    break;
+                case "Rotate Reverse":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE;
+                    menuOptions[11] = null;
+                    break;
+                case "Disappear":
+                    left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR;
+                    menuOptions[12] = null;
+                    break;
+                default:
+                    return;
             }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Pull"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[1] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Lift"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[2] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Drop"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[3] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Left"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[4] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Right"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[5] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Rotate Left"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[6] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Rotate Right"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[7] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Rotate Clockwise"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[8] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Rotate Counter"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[9] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Rotate Forwards"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[10] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Rotate Reverse"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[11] = null;
-                rebuildLists();
-            }
-            else if (pickLeft.options[pickLeft.value].text.Equals("Disappear"))
-            {
-                left = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR;
-                pickLeft.transform.Translate(0, -100, 0);
-                train_left.transform.Translate(0, 100, 0);
-                selectedLeft = true;
-                menuOptions[12] = null;
-                rebuildLists();
-            }
-            else
-            {
-            }
+            pickLeft.transform.Translate(0, -100, 0);
+            train_left.transform.Translate(0, 100, 0);
+            selectedLeft = true;
+            rebuildLists();
         }
     }
     /**
@@ -614,126 +457,67 @@ public class EmotivCtrl : MonoBehaviour {
         }
         else
         {
-            if (pickRight.options[pickRight.value].text.Equals("Push"))
+            switch (pickRight.options[pickRight.value].text)
             {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[0] = null;
-                rebuildLists();
+                case "Push":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PUSH;
+                    menuOptions[0] = null;
+                    break;
+                case "Pull":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL;
+                    menuOptions[1] = null;
+                    break;
+                case "Lift":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT;
+                    menuOptions[2] = null;
+                    break;
+                case "Drop":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP;
+                    menuOptions[3] = null;
+                    break;
+                case "Left":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
+                    menuOptions[4] = null;
+                    break;
+                case "Right":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
+                    menuOptions[5] = null;
+                    break;
+                case "Rotate Left":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT;
+                    menuOptions[6] = null;
+                    break;
+                case "Rotate Right":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT;
+                    menuOptions[7] = null;
+                    break;
+                case "Rotate Clockwise":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE;
+                    menuOptions[8] = null;
+                    break;
+                case "Rotate Counter":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE;
+                    menuOptions[9] = null;
+                    break;
+                case "Rotate Forwards":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS;
+                    menuOptions[10] = null;
+                    break;
+                case "Rotate Reverse":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE;
+                    menuOptions[11] = null;
+                    break;
+                case "Disappear":
+                    right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR;
+                    menuOptions[12] = null;
+                    break;
+                default:
+                    return;
             }
-            else if (pickRight.options[pickRight.value].text.Equals("Pull"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_PULL;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[1] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Lift"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LIFT;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[2] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Drop"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DROP;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[3] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Left"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_LEFT;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[4] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Right"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_RIGHT;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[5] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Rotate Left"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_LEFT;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[6] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Rotate Right"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_RIGHT;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[7] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Rotate Clockwise"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_CLOCKWISE;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[8] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Rotate Counter"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_COUNTER_CLOCKWISE;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[9] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Rotate Forwards"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_FORWARDS;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[10] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Rotate Reverse"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_ROTATE_REVERSE;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[11] = null;
-                rebuildLists();
-            }
-            else if (pickRight.options[pickRight.value].text.Equals("Disappear"))
-            {
-                right = (uint)EdkDll.IEE_MentalCommandAction_t.MC_DISAPPEAR;
-                pickRight.transform.Translate(0, -100, 0);
-                train_right.transform.Translate(0, 100, 0);
-                selectedRight = true;
-                menuOptions[12] = null;
-                rebuildLists();
-            }
-            else
-            {
-            }
+            pickRight.transform.Translate(0, -100, 0);
+            train_right.transform.Translate(0, 100, 0);
+            selectedRight = true;
+            rebuildLists();
         }
     }
     /**

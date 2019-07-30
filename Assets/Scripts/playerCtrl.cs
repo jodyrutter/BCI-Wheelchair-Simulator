@@ -2,7 +2,7 @@
  * Class to control player action and movement.
  * 
  * @author Jody Rutter
- * @version 1.0 4/30/2019
+ * @version 2.0 7/30/2019
  */
 using System;
 using System.Collections;
@@ -34,7 +34,7 @@ public class playerCtrl : MonoBehaviour {
     {
         EmoEngine.Instance.EmoStateUpdated += new EmoEngine.EmoStateUpdatedEventHandler(engine_EmoStateUpdated);
         conesHit = 0;
-        arraySize = 30;
+        arraySize = 50;
         threshold_forward = arraySize/10;
         threshold_left = arraySize/10;
         threshold_right = arraySize/10;
@@ -61,21 +61,19 @@ public class playerCtrl : MonoBehaviour {
         if ((movement.Count+1) > arraySize)
         {
             removedAction = movement[0];
-            if (removedAction == 1)
+            switch (removedAction)
             {
-                numTrueForward--;
-            }
-            else if(removedAction == 2)
-            {
-                numTrueLeft--;
-            }
-            else if(removedAction == 3)
-            {
-                numTrueRight--;
-            }
-            else
-            {
-                //Do nothing
+                case 1:
+                    numTrueForward--;
+                    break;
+                case 2:
+                    numTrueLeft--;
+                    break;
+                case 3:
+                    numTrueRight--;
+                    break;
+                default:
+                    break;
             }
             movement.RemoveAt(0);
         }
