@@ -32,7 +32,10 @@ public class EmotivCtrl : MonoBehaviour {
     string[] menuOptions;  //A list of dropdown options.
     public static float displayTime = 0;  //Time to display a message.
     public static float loadTime = 0;  //A time that indicates when to load.
-    bool loaded = false;
+    bool loaded = false;  //True after the program loads.
+    public static bool stopped; //A bool that is true if the stop sign is pressed.
+    public Button stop; //Stop button
+    public Button go;  //Go button
     /*
 	 * Create instance of EmoEngine and set up handlers for: 
      * user events, connection events and mental command training events.
@@ -93,6 +96,8 @@ public class EmotivCtrl : MonoBehaviour {
         menuOptions[11] = "Rotate Reverse";
         menuOptions[12] = "Disappear";
         movementEnabled = true;
+        stopped = false;
+        go.transform.Translate(50,0,0);
         informationMenu.transform.Translate(0, Screen.height, 0);
         loadTime = 0.25f;
     }
@@ -692,5 +697,37 @@ public class EmotivCtrl : MonoBehaviour {
     public void hideInfoMenu()
     {
         informationMenu.transform.Translate(0,Screen.height,0);
+    }
+    /**
+     * Resets all the mental command binds.
+     */
+    public void resetBinds()
+    {
+        listAction = 0;
+        forward = 0;
+        left = 0;
+        right = 0;
+        selectedForwards = false;
+        selectedLeft = false;
+        selectedRight = false;
+        rebuildLists();
+    }
+    /**
+     * Stops/starts the wheelchair when someone hits the stop button.
+     */
+     public void stopStart()
+    {
+        if (stopped)
+        {
+            stop.transform.Translate(-50, 0, 0);
+            go.transform.Translate(50, 0, 0);
+            stopped = false;
+        }
+        else
+        {
+            stop.transform.Translate(50,0,0);
+            go.transform.Translate(-50, 0, 0);
+            stopped = true;
+        }
     }
 }

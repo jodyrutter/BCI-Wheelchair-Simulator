@@ -1,5 +1,5 @@
 ﻿/**
- * Class to control player action and movement.
+ * Class to control user action and movement.
  * 
  * @author Jody Rutter
  * @version 2.0 7/30/2019
@@ -11,9 +11,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using Emotiv;
 
-public class playerCtrl : MonoBehaviour {
+public class userCtrl : MonoBehaviour {
     public float speed;  //The natural speed of the wheelchair. 
     public float rotationSpeed;  //The speed the wheelchair rotates.
+    public Slider forward_slider;  //Slider that controls forward threshold.
+    public Slider left_slider; //Slider that controls left threshold.
+    public Slider right_slider;  //Slider that controls right threshold.
+    public GameObject optionsMenu;  //An options menu.
     private int conesHit;  //The number of cones the wheelchair hits.
     private int arraySize;  //The size of the array that lists the past emotiv states.
     private int threshold_forward;  //The number of forward states needed in the array to go forward.
@@ -27,6 +31,7 @@ public class playerCtrl : MonoBehaviour {
     List<int> movement = new List<int>();  //A list containing an arraySize number of previous emotiv states.
     public Text message_box;  //A textbox to display messages to.
     private static float unresponsive; //Time till Emotive is deamed unresponsive.
+    public bool simActive;  //True when simulation is active, and wheelchair isn't.
     /*
      * Initialize all variables.
      */
@@ -34,7 +39,7 @@ public class playerCtrl : MonoBehaviour {
     {
         EmoEngine.Instance.EmoStateUpdated += new EmoEngine.EmoStateUpdatedEventHandler(engine_EmoStateUpdated);
         conesHit = 0;
-        arraySize = 50;
+        arraySize = 10;
         threshold_forward = arraySize/10;
         threshold_left = arraySize/10;
         threshold_right = arraySize/10;
@@ -42,6 +47,16 @@ public class playerCtrl : MonoBehaviour {
         numTrueLeft = 0;
         numTrueRight = 0;
         unresponsive = 1f;
+        forward_slider.minValue = 1;
+        forward_slider.maxValue = arraySize;
+        forward_slider.value = threshold_forward;
+        left_slider.minValue = 1;
+        left_slider.maxValue = arraySize;
+        left_slider.value = threshold_left;
+        right_slider.minValue = 1;
+        right_slider.maxValue = arraySize;
+        right_slider.value = threshold_right;
+        simActive = true;
     }
     /*
 	 * This method handles the EmoEngine update event 
@@ -141,34 +156,36 @@ public class playerCtrl : MonoBehaviour {
 	 * A method that determines when the wheelchair should be moving.
 	*/
     void FixedUpdate() {
-        if (EmotivCtrl.movementEnabled)  //If movement is enabled, the wheelchair can move with BCI and keys.
-        {
-            //Deciding movement based on emotiv data.
-            if (numTrueForward > threshold_forward)
+        if (!EmotivCtrl.stopped && simActive) {  //If movement is disabled via stop sign, it can't move, even with keys.
+            if (EmotivCtrl.movementEnabled)  //If movement is enabled, the wheelchair can move with BCI and keys.
             {
-                moveFoward();
+                //Deciding movement based on emotiv data.
+                if (numTrueForward > threshold_forward)
+                {
+                    moveFoward();
+                }
+                if ((numTrueRight > numTrueLeft) && (numTrueRight > threshold_right))
+                {
+                    rotateRight();
+                }
+                else if (numTrueLeft > threshold_left)
+                {
+                    rotateLeft();
+                }
+                else
+                {
+                    //Do nothing.
+                }
             }
-            if ((numTrueRight > numTrueLeft) && (numTrueRight > threshold_right))
-            {
-                rotateRight();
-            }
-            else if (numTrueLeft > threshold_left)
-            {
-                rotateLeft();
-            }
-            else
-            {
-                //Do nothing.
-            }
+            //If the wheelchair is not enabled, it can only move with keys.
+            //Movement via keys.
+            float translation = Input.GetAxis("Vertical") * speed;
+            float rotation = Input.GetAxis("Horizontal") * rotationSpeed;
+            translation *= Time.deltaTime;
+            rotation *= Time.deltaTime;
+            transform.Translate(0, 0, translation);
+            transform.Rotate(0, rotation, 0);
         }
-        //If the wheelchair is not enabled, it can only move with keys.
-        //Movement via keys.
-        float translation = Input.GetAxis("Vertical") * speed;
-        float rotation = Input.GetAxis("Horizontal") * rotationSpeed;
-        translation *= Time.deltaTime;
-        rotation *= Time.deltaTime;
-        transform.Translate(0, 0, translation);
-        transform.Rotate(0, rotation, 0);
         //If the wheelchair falls beneath the floor somehow, move it back to the starting position.
         if (rb.position.y < 0)
         {
@@ -198,70 +215,28 @@ public class playerCtrl : MonoBehaviour {
         }
     }
     /**
-     * Decreases threshold of the forward command.
+     * Changes threshold of the forward command.
      */
-    public void upSensitivityForward()
+    public void changeSensitivityForward()
     {
-        if (threshold_forward > (arraySize/10))
-        {
-            threshold_forward -= (arraySize/10);
-        }
-        displayMessage("Forward-sensitivity: " + ((arraySize - threshold_forward) / (arraySize/10)));
+        threshold_forward = (int)(forward_slider.value);
+        displayMessage("Forward-sensitivity: " + (((arraySize - threshold_forward))+1));
     }
     /**
-     * Decreases threshold of the left command.
+     * Changes threshold of the left command.
      */
-    public void upSensitivityLeft()
+    public void changeSensitivityLeft()
     {
-        if (threshold_left > (arraySize/10))
-        {
-            threshold_left -= (arraySize/10);
-        }
-        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left) / (arraySize / 10)));
+        threshold_left = (int)(left_slider.value);
+        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left)+1));
     }
     /**
-     * Decreases threshold of the right command.
+     * Changes threshold of the right command.
      */
-    public void upSensitivityRight()
+    public void changeSensitivityRight()
     {
-        if (threshold_right > (arraySize/10))
-        {
-            threshold_right -= (arraySize/10);
-        }
-        displayMessage("Right-sensitivity: " + ((arraySize - threshold_right) / (arraySize / 10)));
-    }
-    /**
-     * Increases theshold of the forward command.
-     */
-    public void downSensitivityForward()
-    {
-        if (threshold_forward < 9*(arraySize/10))
-        {
-            threshold_forward += (arraySize/10);
-        }
-        displayMessage("Forward-sensitivity: " + ((arraySize - threshold_forward) / (arraySize / 10)));
-    }
-    /**
-     * Increases theshold of the left command.
-     */
-    public void downSensitivityLeft()
-    {
-        if (threshold_left < 9*(arraySize/10))
-        {
-            threshold_left += (arraySize/10);
-        }
-        displayMessage("Left-sensitivity: " + ((arraySize - threshold_left) / (arraySize / 10)));
-    }
-    /**
-     * Increases theshold of the right command.
-     */
-    public void downSensitivityRight()
-    {
-        if (threshold_right < 9*(arraySize/10))
-        {
-            threshold_right += (arraySize/10);
-        }
-        displayMessage("Right-sensitivity: " + ((arraySize - threshold_right) / (arraySize / 10)));
+        threshold_right = (int)(right_slider.value);
+        displayMessage("Right-sensitivity: " + (((arraySize - threshold_right))+1));
     }
     /**
      * Displays a message to the user for 5 seconds.
@@ -272,5 +247,33 @@ public class playerCtrl : MonoBehaviour {
     {
         EmotivCtrl.displayTime = 5f;
         message_box.text = message;
+    }
+    /**
+     * When the options button is clicked, an options menu is set in the middle of the screen.
+     */
+    public void showOptionsMenu()
+    {
+        optionsMenu.transform.position = new Vector3(150, Screen.height / 2, 0);
+    }
+    /**
+     * Hides options when the user presses ok.
+     */
+    public void hideOptionsMenu()
+    {
+        optionsMenu.transform.Translate(0, Screen.height, 0);
+    }
+    /**
+     * Method to switch between using the wheelchair and using the simulator.
+     */
+    public void switchChairSim()
+    {
+        if (simActive)
+        {
+            simActive = false;
+        }
+        else
+        {
+            simActive = true;
+        }
     }
 }
